@@ -1,0 +1,161 @@
+#pragma kernel WaveKernel;
+#pragma kernel MWaveKernel;
+#pragma kernel RippleKernel;
+#pragma kernel SphereKernel;
+#pragma kernel TorusKernel;
+#pragma kernel TorusAKernel;
+
+#pragma kernel TorusTTKernel;
+#pragma kernel SphereTTKernel;
+
+#define PI 3.14159265358979323846
+
+// dont use hlsli, not allow!
+#include "SurfaceCompute.hlsl"  
+
+RWStructuredBuffer<float3> _Pos;
+
+float _Step, _Time, _Progress, _TransP;
+uint _Res, _Ratio;
+
+float2 GetUV (uint3 id)
+{
+    return (id.xy + 0.5) * _Step - 1.0;
+}
+
+void setPosition(uint3 id, float3 position)
+{
+    if (id.x < _Res && id.y < _Res)
+    {
+        _Pos[id.x + id.y * _Res] = position;
+    }
+}
+
+float3 Sphere (float u, float v, float t)
+{
+    float r = 0.9 + 0.1 * sin(PI * ((6.0 * _Progress * _Ratio) * u
+        + (4.0 * _Progress * _Ratio) * v + t));
+    float s = r * cos(0.5 * PI * v);
+    float3 p;
+    p.x = s * sin(PI * u);
+    p.y = r * sin(0.5 * PI * v);
+    p.z = s * cos(PI * u);
+    return p;
+}
+
+float ProcessParamart()
+{
+    float DPara = _Time % 4;
+    if(DPara > 1 && DPara <= 2)
+        DPara = 1;
+    else if(DPara > 2 && DPara <= 3)
+        DPara = 1 - (DPara % 2) ;
+    else if(DPara > 3 && DPara <= 4)
+        DPara = 0;
+    
+    // return  lerp(ceil(_Progress), floor(_Progress), DPara);
+    return  lerp(ceil(_Progress), floor(_Progress), sin(_Time * 0.5));
+}
+
+float3 Tours (float u, float v, float t)
+{
+    float r1 = 0.7 + 0.1 * sin(PI * ((6.0 + _Progress * _Ratio * 2.0) * u + 0.5 * t));
+    float r2 = 0.15 + 0.05 * sin(PI * ((8.0 * _Progress* _Ratio) * u
+        + ((4.0 * _Progress* _Ratio)) * v + (2.0 + _Progress* _Ratio) * t));
+    float s = r2 * cos(PI * v) + r1;
+    float3 p;
+    p.x = s * sin(PI * u);
+    p.y = r2 * sin(PI * v);
+    p.z = s * cos(PI * u);
+    return p;
+}
+
+float3 SphereTT (float u, float v, float t)
+{
+    float pParamart = ProcessParamart();
+    float r = 0.9 + 0.1 * sin(PI * ((6.0 * pParamart) * u
+        + (4.0 * pParamart) * v + t));
+    float s = r * cos(0.5 * PI * v);
+    float3 p;
+    p.x = s * sin(PI * u);
+    p.y = r * sin(0.5 * PI * v);
+    p.z = s * cos(PI * u);
+    return p;
+}
+
+float3 ToursTT (float u, float v, float t)
+{
+    float pParamart = ProcessParamart();
+    
+    float r1 = 0.7 + 0.1 * sin(PI * ((6.0 + pParamart * 2.0) * u + 0.5 * t));
+    float r2 = 0.15 + 0.05 * sin(PI * ((8.0 * pParamart) * u
+        + ((4.0 * pParamart)) * v + (2.0 + pParamart) * t));
+    float s = r2 * cos(PI * v) + r1;
+    float3 p;
+    p.x = s * sin(PI * u);
+    p.y = r2 * sin(PI * v);
+    p.z = s * cos(PI * u);
+    return p;
+}
+
+[numthreads(8,8,1)] 
+void WaveKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, Wave(uv.x, uv.y, _Time)); 
+}
+
+[numthreads(8,8,1)] 
+void MWaveKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, MultiWave(uv.x, uv.y, _Time)); 
+}
+
+[numthreads(8,8,1)] 
+void CWaveKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, MultiWave(uv.x, uv.y, _Time)); 
+}
+
+[numthreads(8,8,1)] 
+void RippleKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, Ripple(uv.x, uv.y, _Time)); 
+}
+[numthreads(8,8,1)] 
+void SphereKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, Sphere(uv.x, uv.y, _Time)); 
+}
+[numthreads(8,8,1)] 
+void TorusKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, Tours(uv.x, uv.y, _Time)); 
+}
+
+[numthreads(8,8,1)] 
+void TorusAKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, ToursA(uv.x, uv.y, _Time)); 
+}
+///////////////////////////////////////////////
+
+[numthreads(8,8,1)] 
+void TorusTTKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, ToursTT(uv.x, uv.y, _Time)); 
+}
+
+[numthreads(8,8,1)] 
+void SphereTTKernel (uint3 id : SV_DispatchThreadID) 
+{ 
+    float2 uv = GetUV(id); 
+    setPosition(id, SphereTT(uv.x, uv.y, _Time)); 
+}
