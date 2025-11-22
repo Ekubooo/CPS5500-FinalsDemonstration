@@ -26,10 +26,8 @@ public class MyGUI : MonoBehaviour
         }
         if (_duration >= sampleDuration)
         {
-            myDisplay.SetText("FPS\n{0:0}\n{1:0}\n{2:0}",
-                _frames / _duration,
-                1f / _bestDuration, 
-                1f / _worstDuration);
+            myDisplay.SetText("FPS\n{0:0}",
+                _frames / _duration);
             _frames = 0;
             _duration = 0f;
             _bestDuration = float.MaxValue;
