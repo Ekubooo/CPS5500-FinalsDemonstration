@@ -3,10 +3,12 @@ using static UnityEngine.Mathf;
 public static class FuncLibXD
 {
     public enum CSFuncName{Wave, MultiWave ,Ripple, Sphere, Tours, ToursA, ToursTT, SphereTT}
+    // public enum DemonFuncName {Sphere,Tours, Ripple, Wave}
     public delegate Vector3 Func(float x, float z, float t);
     public enum FuncName{Wave, MultiWave, CrossWave, Ripple, Sphere, Tours, Tours2, ToursR}
 
     static Func[] _funcs = {Wave, MultiWave, CrossWave, Ripple, Sphere, Tours,  Tours2, ToursR};
+    static Func[] _funcsDemon = {CrossWave, Ripple, Sphere, Tours};
 
     public static Func GetFunc(FuncName name)
     {

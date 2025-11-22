@@ -11,6 +11,7 @@ public class GraphGPU2 : MonoBehaviour
     
     [SerializeField] FuncLibXD.FuncName func;
     [SerializeField] FuncLibXD.CSFuncName func2;
+    // [SerializeField] FuncLibXD.DemonFuncName func3;
     
     public enum TransitionMode { Cycle, Random }
     [SerializeField] TransitionMode transitionMode;
@@ -99,6 +100,16 @@ public class GraphGPU2 : MonoBehaviour
         Graphics.DrawMeshInstancedProcedural
             (mesh, 0, material, bounds, resolution* resolution);
         
+    }
+
+    public void OnChangeResolution(float res)
+    {
+        resolution = Mathf.RoundToInt(res);
+    }
+
+    public void OnChangeModel(float Model)
+    {
+        func2 = (FuncLibXD.CSFuncName)Mathf.RoundToInt(Model);
     }
     
 }
