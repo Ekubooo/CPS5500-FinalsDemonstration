@@ -44,7 +44,7 @@ public class FractalJobs : MonoBehaviour
         }
     }
 
-    [SerializeField, Range(1, 9)] int depth = 6;
+    [SerializeField, Range(1, 9)] int depth;
     [SerializeField] Mesh mesh;
     [SerializeField] Material material;
     static float3[] _directions = {up(), right(), left(), forward(), back()};
@@ -164,5 +164,11 @@ public class FractalJobs : MonoBehaviour
             Graphics.DrawMeshInstancedProcedural
                 (mesh, 0, material, bounds, buffer.count, propertyBlock);
         }
+    }
+
+    public void OnChangeDepth(float _depth)
+    {
+        depth = Mathf.RoundToInt(_depth);
+        OnValidate();
     }
 }
