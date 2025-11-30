@@ -58,9 +58,9 @@ namespace Seb.Fluid2D.Simulation
 		const int updatePositionKernel = 7;
 
 		// State
-		bool isPaused;
-		Spawner2D.ParticleSpawnData spawnData;
-		bool pauseNextFrame;
+		internal bool isPaused;
+		internal Spawner2D.ParticleSpawnData spawnData;
+		internal bool pauseNextFrame;
 
 		public int numParticles { get; private set; }
 
@@ -143,7 +143,7 @@ namespace Seb.Fluid2D.Simulation
 			}
 		}
 
-		void RunSimulationStep()
+		internal void RunSimulationStep()
 		{
 			ComputeHelper.Dispatch(compute, numParticles, kernelIndex: externalForcesKernel);
 
@@ -199,7 +199,7 @@ namespace Seb.Fluid2D.Simulation
 			compute.SetFloat("interactionInputRadius", interactionRadius);
 		}
 
-		void SetInitialBufferData(Spawner2D.ParticleSpawnData spawnData)
+		internal void SetInitialBufferData(Spawner2D.ParticleSpawnData spawnData)
 		{
 			float2[] allPoints = new float2[spawnData.positions.Length]; //
 			System.Array.Copy(spawnData.positions, allPoints, spawnData.positions.Length);
@@ -259,5 +259,7 @@ namespace Seb.Fluid2D.Simulation
 				}
 			}
 		}
+
+		
 	}
 }
