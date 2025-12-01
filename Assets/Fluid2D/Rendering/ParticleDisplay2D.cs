@@ -23,6 +23,8 @@ namespace Seb.Fluid2D.Rendering
 		void Start()
 		{
 			material = new Material(shader);
+            // 关键修复：在开始运行时强制标记为需要更新，确保纹理和Scale被传递给Shader
+            needsUpdate = true;
 		}
 
 		void LateUpdate()
@@ -36,7 +38,6 @@ namespace Seb.Fluid2D.Rendering
 
 		void UpdateSettings()
 		{
-			
 			material.SetBuffer("Positions2D", sim.positionBuffer);
 			material.SetBuffer("Velocities", sim.velocityBuffer);
 			material.SetBuffer("DensityData", sim.densityBuffer);
@@ -44,15 +45,19 @@ namespace Seb.Fluid2D.Rendering
 			ComputeHelper.CreateArgsBuffer(ref argsBuffer, mesh, sim.positionBuffer.count);
 			bounds = new Bounds(Vector3.zero, Vector3.one * 10000);
 
-			if (needsUpdate)
+            // 逻辑修改：如果纹理不存在，或者标记为需要更新，则重新生成纹理
+			if (needsUpdate || gradientTexture == null)
 			{
 				needsUpdate = false;
 				TextureFromGradient(ref gradientTexture, gradientResolution, colourMap);
 				material.SetTexture("ColourMap", gradientTexture);
-
-				material.SetFloat("scale", scale);
-				material.SetFloat("velocityMax", velocityDisplayMax);
 			}
+
+            // 关键修复：将这些轻量级 float 参数移出 if 块
+            // 或者你也可以保留在 if 块里，但必须保证 Start() 里 needsUpdate = true
+            // 为了像 PEDemo 一样稳健，建议每帧设置，防止材质丢失状态
+            material.SetFloat("scale", scale);
+            material.SetFloat("velocityMax", velocityDisplayMax);
 		}
 
 		public static void TextureFromGradient(ref Texture2D texture, int width, Gradient gradient, FilterMode filterMode = FilterMode.Bilinear)
