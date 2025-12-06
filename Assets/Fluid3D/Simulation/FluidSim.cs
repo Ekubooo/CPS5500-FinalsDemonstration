@@ -77,17 +77,17 @@ namespace Seb.Fluid.Simulation
 		SpatialHash spatialHash;
 
 		// State
-		bool isPaused;
-		bool pauseNextFrame;
+		internal bool isPaused;
+		internal bool pauseNextFrame;
 		float smoothRadiusOld;
 		float simTimer;
-		bool inSlowMode;
-		Spawner3D.SpawnData spawnData;
+		internal bool inSlowMode;
+		internal Spawner3D.SpawnData spawnData;
 		Dictionary<ComputeBuffer, string> bufferNameLookup;
 
 		void Start()
 		{
-			Debug.Log("Controls: Space = Play/Pause, Q = SlowMode, R = Reset");
+			Debug.Log("Controls: Space = Play/Pause, S = SlowMode, R = Reset");
 			isPaused = false;
 
 			Initialize();
@@ -281,7 +281,7 @@ namespace Seb.Fluid.Simulation
 			HandleInput();
 		}
 
-		void RunSimulationFrame(float frameDeltaTime)
+		internal void RunSimulationFrame(float frameDeltaTime)
 		{
 			float subStepDeltaTime = frameDeltaTime / iterationsPerFrame;
 			UpdateSettings(subStepDeltaTime, frameDeltaTime);
@@ -388,7 +388,7 @@ namespace Seb.Fluid.Simulation
 			compute.SetFloat("bubbleScale", bubbleScale);
 		}
 
-		void SetInitialBufferData(Spawner3D.SpawnData spawnData)
+		internal void SetInitialBufferData(Spawner3D.SpawnData spawnData)
 		{
 			positionBuffer.SetData(spawnData.points);
 			predictedPositionsBuffer.SetData(spawnData.points);
@@ -417,6 +417,7 @@ namespace Seb.Fluid.Simulation
 			if (Input.GetKeyDown(KeyCode.R))
 			{
 				pauseNextFrame = true;
+				transform.localRotation = Quaternion.Euler(Vector3.zero);
 				SetInitialBufferData(spawnData);
 				// Run single frame of sim with deltaTime = 0 to initialize density texture
 				// (so that display can work even if paused at start)
@@ -426,9 +427,24 @@ namespace Seb.Fluid.Simulation
 				}
 			}
 
-			if (Input.GetKeyDown(KeyCode.Q))
+			if (Input.GetKeyDown(KeyCode.S))
 			{
 				inSlowMode = !inSlowMode;
+			}
+			
+			if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.E))
+			{
+				isPaused = false;
+				Vector3 tempR = transform.localRotation.eulerAngles;
+				if (Input.GetKey(KeyCode.Q))
+				{
+					tempR.y -= 0.25f;
+				}
+				else if (Input.GetKey(KeyCode.E))
+				{
+					tempR.y += 0.25f;
+				}
+				transform.localRotation = Quaternion.Euler(tempR);
 			}
 		}
 

@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Fluid2D/F2D.unity
-    guid: f8cc88136a1948b42bd22aa8a7268dc6
+    path: Assets/Fluid3D/F3D_Particles.unity
+    guid: 3dd598e8663693949b9689a1842ec707
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
